@@ -2,6 +2,6 @@
 <resources>
     <color name="background">#03A9F4</color>
     <color name="background2">#000088</color>
-    <color name="digital_text">#ffffff</color>
-    <color name="digital_date_text">#99ffffff</color>
+    <color name="text_primary">#ffffff</color>
+    <color name="text_secondary">#99ffffff</color>
 </resources>

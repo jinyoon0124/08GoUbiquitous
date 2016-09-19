@@ -112,6 +112,10 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter
     public static final int LOCATION_STATUS_UNKNOWN = 3;
     public static final int LOCATION_STATUS_INVALID = 4;
 
+    private String mHighTemp;
+    private String mLowTemp;
+    private int mWeatherId;
+
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
         mGoogleApiClient = new GoogleApiClient.Builder(context)
@@ -125,21 +129,17 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter
     private void sendWeatherData(){
         Context context = getContext();
 
-        String highTemp = "0";
-        String lowTemp = "3";
-        int weatherId = 0;
-
         String locationQuery = Utility.getPreferredLocation(context);
         Uri weatherUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(locationQuery, System.currentTimeMillis());
 
         Cursor cursor = context.getContentResolver().query(weatherUri, NOTIFY_WEATHER_PROJECTION, null, null, null);
         if (cursor.moveToFirst()) {
-            weatherId = cursor.getInt(INDEX_WEATHER_ID);
+            mWeatherId = cursor.getInt(INDEX_WEATHER_ID);
             double high = cursor.getDouble(INDEX_MAX_TEMP);
             double low = cursor.getDouble(INDEX_MIN_TEMP);
 
-            highTemp = Utility.formatTemperature(context, high);
-            lowTemp = Utility.formatTemperature(context, low);
+            mHighTemp = Utility.formatTemperature(context, high);
+            mLowTemp = Utility.formatTemperature(context, low);
 
         }
         cursor.close();
@@ -147,10 +147,10 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter
         if(mGoogleApiClient.isConnected()) {
             Log.d(LOG_TAG, "mGoogleApiClient connection found!");
             PutDataMapRequest putRequest = PutDataMapRequest.create(PATH).setUrgent();
-            putRequest.getDataMap().putString("highTemp", highTemp);
-            putRequest.getDataMap().putString("lowTemp", lowTemp);
-            Log.v("SEND WEATHER DATA  ::: ", lowTemp);
-            putRequest.getDataMap().putInt("id",weatherId);
+            putRequest.getDataMap().putString("highTemp", mHighTemp);
+            putRequest.getDataMap().putString("lowTemp", mLowTemp);
+            Log.v("SEND WEATHER DATA  ::: ", mLowTemp);
+            putRequest.getDataMap().putInt("weatherId",mWeatherId);
             putRequest.getDataMap().putInt("value", (int) System.currentTimeMillis());
 
             PutDataRequest request=putRequest.asPutDataRequest();

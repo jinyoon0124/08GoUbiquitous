@@ -20,8 +20,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -30,7 +31,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
@@ -107,6 +107,8 @@ public class SunShineWatchFace extends CanvasWatchFaceService
         Paint mBackgroundPaint;
         Paint mTimeTextPaint;
         Paint mDateTextPaint;
+        Paint mLowTempTextPaint;
+        Paint mHighTempTextPaint;
         boolean mAmbient;
         Calendar mCalendar;
         private final String ACTION = "com.example.TODAY_WEATHER";
@@ -129,8 +131,9 @@ public class SunShineWatchFace extends CanvasWatchFaceService
         private final String PATH = "/today-weather";
 
         private GoogleApiClient mGoogleApiClient;
-        private String mHighTemp;
-        private String mLowTemp;
+        private String mHighTemp="1";
+        private String mLowTemp="0";
+        private int mWeatherId=800;
 
         SimpleDateFormat mDateFormat;
         /**
@@ -167,12 +170,16 @@ public class SunShineWatchFace extends CanvasWatchFaceService
             mBackgroundPaint.setColor(resources.getColor(R.color.background));
 
             mTimeTextPaint = new Paint();
-            mTimeTextPaint = createTextPaint(resources.getColor(R.color.digital_text));
+            mTimeTextPaint = createTextPaint(resources.getColor(R.color.text_primary));
 
             mDateTextPaint = new Paint();
-            mDateTextPaint = createTextPaint(resources.getColor(R.color.digital_date_text));
+            mDateTextPaint = createTextPaint(resources.getColor(R.color.text_secondary));
 
+            mHighTempTextPaint = new Paint();
+            mHighTempTextPaint = createTempTextPaint(resources.getColor(R.color.text_primary));
 
+            mLowTempTextPaint = new Paint();
+            mLowTempTextPaint = createTempTextPaint(resources.getColor(R.color.text_secondary));
         }
 
         @Override
@@ -187,6 +194,14 @@ public class SunShineWatchFace extends CanvasWatchFaceService
             paint.setTypeface(NORMAL_TYPEFACE);
             paint.setAntiAlias(true);
             paint.setTextAlign(Paint.Align.CENTER);
+            return paint;
+        }
+
+        private Paint createTempTextPaint(int textColor){
+            Paint paint = new Paint();
+            paint.setColor(textColor);
+            paint.setTypeface(NORMAL_TYPEFACE);
+            paint.setAntiAlias(true);
             return paint;
         }
 
@@ -240,12 +255,17 @@ public class SunShineWatchFace extends CanvasWatchFaceService
                     ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
             float dateTextSize = resources.getDimension(isRound
                     ? R.dimen.digital_date_text_size_round : R.dimen.digital_date_text_size);
+            float tempTextSize = resources.getDimension(isRound
+                    ? R.dimen.digital_temp_text_size_round : R.dimen.digital_temp_text_size);
 
             mLineHeight = resources.getDimension(isRound
                     ? R.dimen.digital_date_text_size_round : R.dimen.digital_date_text_size);
 
             mTimeTextPaint.setTextSize(timeTextSize);
             mDateTextPaint.setTextSize(dateTextSize);
+            mLowTempTextPaint.setTextSize(tempTextSize);
+            mHighTempTextPaint.setTextSize(tempTextSize);
+
         }
 
         @Override
@@ -320,14 +340,19 @@ public class SunShineWatchFace extends CanvasWatchFaceService
 //
             String text = String.format("%d:%02d",mCalendar.get(Calendar.HOUR_OF_DAY), mCalendar.get(Calendar.MINUTE));
 
-
+            //Time & Date
             canvas.drawText(text, canvas.getWidth()/2, mYOffset, mTimeTextPaint);
             canvas.drawText(mDateFormat.format(mCalendar.getTime()).toUpperCase(), canvas.getWidth()/2, (float)(mYOffset+mLineHeight*1.5), mDateTextPaint);
 
-            if(mLowTemp == null){
-                mLowTemp = "0";
-            }
-            canvas.drawText(mLowTemp, mXOffset, mYOffset+mLineHeight*3, mTimeTextPaint);
+            //Icon
+            Bitmap icon = BitmapFactory.decodeResource(getResources(), IconGetter.getIconResourceForWeatherCondition(mWeatherId));
+            canvas.drawBitmap(icon, mXOffset, mYOffset+mLineHeight*3, null);
+
+            //Temperature
+            Log.e("ICON WIDTH", String.valueOf(icon.getWidth()));
+            canvas.drawText(mHighTemp, mXOffset + icon.getWidth()+10, mYOffset+mLineHeight*3 + icon.getHeight()-15, mHighTempTextPaint);
+            canvas.drawText(mLowTemp, mXOffset+ icon.getWidth()+ 80, mYOffset+mLineHeight*3+icon.getHeight()-15, mLowTempTextPaint);
+
 
 
 
@@ -389,6 +414,11 @@ public class SunShineWatchFace extends CanvasWatchFaceService
                     if(path.equals(PATH)){
                         Log.v("DATACHANGED :::", "PAth equals");
                         mLowTemp = dataMap.getString("lowTemp");
+                        mHighTemp = dataMap.getString("highTemp");
+                        mWeatherId = dataMap.getInt("weatherId");
+                        Log.e("WEATHER ID", String.valueOf(mWeatherId));
+                        Log.e("LOW TEMPERATURE", mLowTemp);
+                        Log.e("HIGH TEMPERATURE", mHighTemp);
                         invalidate();
                     }
 
