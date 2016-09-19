@@ -37,6 +37,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import com.example.android.sunshine.app.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.DataApi;
@@ -159,7 +160,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService
             Resources resources = SunShineWatchFace.this.getResources();
             mYOffset = resources.getDimension(R.dimen.digital_y_offset);
 
-            mDateFormat = new SimpleDateFormat("EEE, MMM dd YYYY");
+            mDateFormat = new SimpleDateFormat("EEE, MMM dd yyyy");
 
 
             mBackgroundPaint = new Paint();
@@ -323,8 +324,9 @@ public class SunShineWatchFace extends CanvasWatchFaceService
             canvas.drawText(text, canvas.getWidth()/2, mYOffset, mTimeTextPaint);
             canvas.drawText(mDateFormat.format(mCalendar.getTime()).toUpperCase(), canvas.getWidth()/2, (float)(mYOffset+mLineHeight*1.5), mDateTextPaint);
 
-            SharedPreferences spf = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            mLowTemp = spf.getString("lowTemp", "Default");
+            if(mLowTemp == null){
+                mLowTemp = "0";
+            }
             canvas.drawText(mLowTemp, mXOffset, mYOffset+mLineHeight*3, mTimeTextPaint);
 
 
@@ -368,6 +370,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService
         @Override
         public void onConnected(Bundle bundle) {
             Wearable.DataApi.addListener(mGoogleApiClient, this);
+            Log.e("ONCONNECTED :::" , "Conection Successful");
         }
 
         @Override
@@ -386,7 +389,7 @@ public class SunShineWatchFace extends CanvasWatchFaceService
                     if(path.equals(PATH)){
                         Log.v("DATACHANGED :::", "PAth equals");
                         mLowTemp = dataMap.getString("lowTemp");
-
+                        invalidate();
                     }
 
                 }

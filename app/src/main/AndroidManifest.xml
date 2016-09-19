@@ -19,6 +19,10 @@
     <!-- This permission is necessary in order for Sunshine to perform network access. -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+
+    <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <!-- Permissions required by the sync adapter -->
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
@@ -39,7 +43,6 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -52,6 +55,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
+
         </activity>
         <activity
             android:name=".DetailActivity"
@@ -157,6 +162,11 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info_detail" />
         </receiver>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAN0r8rcvNdADxcf8ulSJsRXExP3-H_wMo" />
+
 
         <service
             android:name=".widget.DetailWidgetRemoteViewsService"

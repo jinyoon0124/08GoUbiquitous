@@ -126,7 +126,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter
         Context context = getContext();
 
         String highTemp = "0";
-        String lowTemp = "0";
+        String lowTemp = "3";
         int weatherId = 0;
 
         String locationQuery = Utility.getPreferredLocation(context);
@@ -149,6 +149,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter
             PutDataMapRequest putRequest = PutDataMapRequest.create(PATH).setUrgent();
             putRequest.getDataMap().putString("highTemp", highTemp);
             putRequest.getDataMap().putString("lowTemp", lowTemp);
+            Log.v("SEND WEATHER DATA  ::: ", lowTemp);
             putRequest.getDataMap().putInt("id",weatherId);
             putRequest.getDataMap().putInt("value", (int) System.currentTimeMillis());
 
@@ -158,9 +159,9 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter
                         @Override
                         public void onResult(DataApi.DataItemResult dataItemResult) {
                             if (!dataItemResult.getStatus().isSuccess()) {
-                                Log.v(LOG_TAG, "data failed to send");
+                                Log.e(LOG_TAG, "data failed to send");
                             } else {
-                                Log.v(LOG_TAG, "data sent successfully");
+                                Log.e(LOG_TAG, "data sent successfully");
                             }
                         }
                     });
